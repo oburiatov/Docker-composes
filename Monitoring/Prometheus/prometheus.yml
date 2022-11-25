@@ -1,0 +1,820 @@
+# my global config
+global:
+  scrape_interval:     30s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 1m # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets: ['example.com:9093']
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  - "aerospike_rules.yaml"
+  - "recording_rules.yml"
+  - "postgres_exporter.yaml"
+  - "node_exporter.yaml"
+  - "main_metrics.yaml"
+  - "gitlabci_exporter.yaml"
+  - "nifi_exporter.yaml"
+  - "nifi_rules.yaml"
+  - "azure_blob-storage_rules.yaml"
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+    static_configs:
+    - targets: ['localhost:9090']
+
+  - job_name: 'federate'
+#    scrape_interval: 60s
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{namespace=~"system-cep-prod|prod|system-ignite-prod|system-infra|system-cep-beta|system-infra-beta"}'
+    static_configs:
+      - targets:
+        - 'sys83.example.com:31000'
+
+  - job_name: 'api'
+    scrape_interval: 5s
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{namespace="system-api"}'
+    static_configs:
+      - targets:
+        - 'sys83.example.com:31000'
+
+
+  - job_name: 'flink'
+#    scrape_interval: 5s
+    honor_labels: true
+    metrics_path: '/federate'
+    params:
+      'match[]':
+        - '{namespace="system-flink-beta"}'
+    static_configs:
+      - targets:
+        - 'sys83.example.com:31000'
+
+  - job_name: 'kafka'
+    scrape_interval: 30s
+    static_configs:
+      - targets:
+        - 'sys-dev-ops.example.com:9308'
+    metrics_path: '/metrics'
+
+  - job_name: 'kafka-dashbord'
+    scrape_interval: 3s
+    static_configs:
+      - targets:
+        - 'sys-dev-ops.example.com:9309'
+    metrics_path: '/metrics'
+
+
+################################postgres_exporter############################################
+  - job_name: 'postgres-exporter'
+    static_configs:
+      - targets:
+        - 'k8s-01.dev.system.example.com:9087' #dev system & ctl
+        labels:
+          env: 'dev'
+          severity: 'Medium'
+          system: 'Postgres'          
+      - targets:
+        - 'sys85.example.com:9087' #beta
+        labels:
+          env: 'beta'
+          severity: 'High'
+          system: 'Postgres'
+      - targets:
+        - 'sys31.example.com:9087' #prod RTN
+        labels:
+          env: 'prod-RTN'
+          severity: 'Critical'
+          system: 'Postgres'
+      - targets:
+        - 'sys03.example.com:9087'
+        labels:
+          env: 'tech-db'
+          severity: 'Blocker'
+          system: 'Postgres'
+      - targets:
+        - 'sys-dev08.example.com:9087'
+        labels:
+          env: 'dev-ctl'
+          severity: 'Medium'
+          system: 'Postgres'
+      - targets:
+        - 'sys45.example.com:9087' 
+        labels:
+          env: 'lte-routers'
+          severity: 'High'
+          system: 'Postgres'          
+      - targets:
+        - 'sys118.example.com:9087' 
+        labels:
+          env: 'prod'
+          severity: 'Blocker'
+          system: 'Postgres'
+
+##################################mysql_exporter############################################
+      - targets:
+        - 'sys45.example.com:9104' #app04
+        labels:
+          severity: 'Critical'
+          system: 'MySQL'
+          env: 'hive-metastore'
+##################################node_exporter############################################
+
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets:
+        - 'sys-ftp01.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'SFTP server'
+      - targets:
+        - 'sys-ftp02.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'SFTP server'
+      - targets:
+        - 'sys01.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Hadoop'
+      - targets:
+        - 'sys02.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Hadoop'
+      - targets:
+        - 'sys03.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Hadoop'
+      - targets:
+        - 'sys04.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys05.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys06.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys07.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys08.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys09.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys10.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys11.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys12.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys13.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys14.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys15.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys16.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys17.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys18.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys19.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys20.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys21.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys22.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys23.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Kafka'
+      - targets:
+        - 'sys24.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Kafka'
+      - targets:
+        - 'sys25.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Kafka'
+      - targets:
+        - 'sys26.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'NiFi'
+      - targets:
+        - 'sys27.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'NiFi'
+      - targets:
+        - 'sys28.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'NiFi'
+      - targets:
+        - 'sys29.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'GitLab'
+      - targets:
+        - 'sys30.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'WSO2'
+      - targets:
+        - 'sys31.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'WSO2'
+      - targets:
+        - 'sys32.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys33.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys34.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys35.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys36.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys37.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys38.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys39.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys40.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys41.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys42.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys43.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys44.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys45.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Prometheus'
+      - targets:
+        - 'sys46.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys47.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys48.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys49.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys50.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys51.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys52.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys53.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys54.example.com:9100'
+        labels:
+          severity: 'Low'
+          system: 'NVIDIA'
+      - targets:
+        - 'sys55.example.com:9100'
+        labels:
+          severity: 'Low'
+          system: 'NVIDIA'
+      - targets:
+        - 'sys73.example.com:9100'
+        labels:
+          severity: 'None'
+          system: 'Nifi 3'
+      - targets:
+        - 'sys74.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys75.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys76.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys77.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys78.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys79.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys80.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys81.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys82.example.com:9100'
+        labels:
+          severity: 'High'
+          system: 'Hadoop'
+      - targets:
+        - 'sys83.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys84.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys85.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys86.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys87.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys88.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys89.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys90.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys91.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys92.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys-app01.example.com:9100'
+        labels:
+          severity: 'Low'
+          system: 'Test'
+      - targets:
+        - 'sys-app02.example.com:9100'
+        labels:
+          severity: 'Low'
+          system: 'Airflow'
+      - targets:
+        - 'sys-app03.example.com:9100'
+        labels:
+          severity: 'Low'
+          system: 'NiFi'
+      - targets:
+        - 'sys-app04.example.com:9100'
+        labels:
+          severity: 'None'
+          system: 'Test, Confluentinc/cp-kafka'
+      - targets:
+        - 'sys-app05.example.com:9100'
+        labels:
+          severity: 'Medium'
+          system: 'Datahub'
+      - targets:
+        - 'sys-app06.example.com:9100'
+        labels:
+          severity: 'Low'
+          system: 'AML'
+      - targets:
+        - 'sys-app07.example.com:9100'
+        labels:
+          severity: 'None'
+          system: 'Test'
+      - targets:
+        - 'sys-app08.example.com:9100'
+        labels:
+          severity: 'None'
+          system: 'Test'
+      - targets:
+        - 'sys-app09.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Directus'
+      - targets:
+        - 'sys-dev-ops.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Grafana'
+      - targets:
+        - 'sys-dev01:9100'
+        labels:
+          severity: 'Low'
+          system: 'dev Kubernetes'
+      - targets:
+        - 'sys-dev02:9100'
+        labels:
+          severity: 'Low'
+          system: 'dev Kubernetes'
+      - targets:
+        - 'sys-dev03:9100'
+        labels:
+          severity: 'Low'
+          system: 'dev Kubernetes'
+      - targets:
+        - 'sys-dev04:9100'
+        labels:
+          severity: 'Low'
+          system: 'dev Kubernetes'
+      - targets:
+        - 'sys-dev05:9100'
+        labels:
+          severity: 'Low'
+          system: 'dev Kubernetes'
+      - targets:
+        - 'sys-dev06:9100'
+        labels:
+          severity: 'Low'
+          system: 'dev Kubernetes'
+      - targets:
+        - 'sys-dev07:9100'
+        labels:
+          severity: 'Low'
+          system: 'dev Kubernetes'
+      - targets:
+        - 'sys-dev08:9100'
+        labels:
+          severity: 'Low'
+          system: 'dev Kafka, SFTP server, CTL'
+      - targets:
+        - 'nexus-vm.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Nexus'
+      - targets:
+        - 'multipass-dgt01.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Mongo prod'
+      - targets:
+        - 'multipass-whg01.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Mongo prod'
+      - targets:
+        - 'multipass-whg02.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Mongo prod'
+      - targets:
+        - 'sys110.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Hadoop'
+      - targets:
+        - 'sys111.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Hadoop'
+      - targets:
+        - 'sys112.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Hadoop'
+      - targets:
+        - 'sys113.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Hadoop'
+      - targets:
+        - 'sys114.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys115.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys116.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys117.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys118.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys119.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys120.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys121.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys122.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys123.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys124.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Hadoop'
+      - targets:
+        - 'sys125.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Hadoop'
+      - targets:
+        - 'sys126.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Hadoop'
+      - targets:
+        - 'sys127.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Hadoop'
+      - targets:
+        - 'sys128.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Hadoop'
+      - targets:
+        - 'sys129.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys116.example.com:9100'
+        labels:
+          severity: 'Critical'
+      - targets:
+        - 'sys122.example.com:9100'
+        labels:
+          severity: 'Critical'
+          system: 'Kubernetes'
+      - targets:
+        - 'sys123.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Hadoop'
+      - targets:
+        - 'sys128.example.com:9100'
+        labels:
+          severity: 'Blocker'
+          system: 'Hadoop'
+      - targets:
+        - 'sys129.example.com:9100'
+        labels:
+
+  - job_name: 'json-nifi-exporter'
+    scrape_interval: 3s
+    metrics_path: /probe
+    static_configs:
+      - targets:
+        - 'http://sys26:9090/nifi-api/controller/cluster'
+        labels:
+          severity: 'Blocker'
+          system: 'NiFi'
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: sys45.example.com:7979
+
+##################################gitlabci_exporter############################################
+
+  - job_name: 'gitlabci-exporter'
+    static_configs:
+     - targets:
+       - 'sys45.example.com:9092'
+                    
+
+
+#################################nifi_exporter##################################################
+  - job_name: 'nifi-To-Azure-exporter'
+    static_configs:
+      - targets:
+        - 'sys114:9092'
+        labels:
+          severity: 'Blocker'
+          system: 'NiFi'
+
+
+#################################nifi-cdr-exporter#################################################
+  - job_name: 'nifi-cdr-exporter'
+    static_configs:
+      - targets:
+        - 'sys85:32701'
+        labels:
+          severity: 'Blocker'
+          system: 'NiFi'
+
+
+#################################azure_exporter#################################################
+  - job_name: 'azure-stasystembackupwesteu01p-exporter'
+    static_configs:
+      - targets:
+        - 'sys45:9359'
+        labels:
+          severity: 'Critical'
+          system: 'Postgres'
+
+#################################azure_exporter#################################################
+#  - job_name: 'azure-adlssystembackupwesteu01p-exporter'
+#    static_configs:
+#      - targets:
+#        - 'sys45:8765'
+#        labels:
+#          severity: 'Blocker'
+#          system: 'system'
+#    scrape_interval: 5m
+#    scrape_timeout: 5m

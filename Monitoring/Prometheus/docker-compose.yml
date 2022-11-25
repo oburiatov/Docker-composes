@@ -1,0 +1,27 @@
+version: '3.3'
+
+networks:
+  default:
+    external:
+      name: localdev
+
+services:
+  prometheus:
+    image: prom/prometheus:v2.38.0
+    container_name: prometheus-v3
+    user: "1000:1000"
+    volumes:
+      - /opt/prometheus/config:/etc/prometheus
+      - /opt/prometheus/db:/prometheus/data:z
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=200d'
+      - '--web.external-url=http://example.com:9090/'
+    ports:
+      - 0.0.0.0:9090:9090
+    environment:
+      - no_proxy=127.0.0.0/8,10.0.0.0/8,*.example.com
+      - http_proxy=http://sgproxy.example.com:3128
+      - https_proxy=http://sgproxy.example.com:3128
+      - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    restart: always

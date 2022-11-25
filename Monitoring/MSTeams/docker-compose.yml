@@ -1,0 +1,21 @@
+version: '3.3'
+
+networks:
+  default:
+    external:
+      name: localdev
+
+services:
+  msteams:
+    image: bzon/prometheus-msteams:v1.3.0
+    container_name: prometheus-msteams
+    volumes:
+      - /opt/msteams:/etc/msteams
+    ports:
+      - 0.0.0.0:2000:2000
+    # environment:
+    #   - no_proxy=127.0.0.0/8,10.0.0.0/8,*.example.com
+    #   - http_proxy=http://example.com:3128
+    #   - https_proxy=http://example.com:3128
+    #   - PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+    restart: always

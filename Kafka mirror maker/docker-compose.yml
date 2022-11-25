@@ -1,0 +1,7 @@
+version: '3'
+services:
+  mirror-maker:
+    image: mirror-maker:6.1.0
+    container_name: mirror-maker
+    volumes:
+      - ./connect-mirror-maker.properties:/etc/kafka/config/connect-mirror-maker.properties
