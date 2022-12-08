@@ -7,19 +7,17 @@ networks:
 
 services:
   prometheus:
-    image: prom/prometheus:v2.38.0
-    container_name: prometheus-v3
+    image: pmdoubez/filestat_exporter
+    container_name: nifi_monitoring_exporter
     user: "1000:1000"
     volumes:
-      - /opt/prometheus/config:/etc/prometheus
-      - /opt/prometheus/db:/prometheus/data:z
+      - /data:/SrcFiles/nifi_monitoring:ro
+      - /grid/0/prometheus/filestat/filestat.yaml:/filestat.yaml
+
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.retention.time=200d'
-      - '--web.external-url=http://example.com:9090/'
-      - '--web.enable-lifecycle'
+      - '-config.file=/filestat.yaml'
     ports:
-      - 0.0.0.0:9090:9090
+      - 0.0.0.0:9943:9943
     environment:
       - no_proxy=127.0.0.0/8,10.0.0.0/8,*.example.com
       - http_proxy=http://sgproxy.example.com:3128
